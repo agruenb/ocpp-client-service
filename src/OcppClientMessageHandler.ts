@@ -1,12 +1,13 @@
 import BootNotificationHandler from "./messageHandlersOcpp16/BootNotificationHandler";
 import HearbeatHandler from "./messageHandlersOcpp16/HeartbeatHandler";
+import { OcppClientsManager } from ".";
 
 const { createRPCError } = require("ocpp-rpc");
 
 export default class OcppClientMessageHandler{
     static attachTo(ocppRpcServer:any):any{
         ocppRpcServer.on('client', async (client:any) => {
-            console.log(`New connection with sessionId:${client.session.sessionId} connected!`);
+            OcppClientsManager.add(client);
         
             (new BootNotificationHandler).attachTo(client);
 
