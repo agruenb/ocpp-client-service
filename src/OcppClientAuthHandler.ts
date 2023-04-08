@@ -1,8 +1,6 @@
-import { DbModelConnectors } from "./db/src/DbModelConnectors";
+import { DbModelStations } from "./db/src/DbModelStations";
 import Logger from "./logs/Logger";
-import OcppServerMessageHandler from "./OcppServerMessageHandler";
-
-const { createRPCError } = require("ocpp-rpc");
+import OcppServerMessageHandler from "./ServerMessageQueueHandler";
 
 export default class OcppClientAuthHandler{
 
@@ -19,16 +17,19 @@ export default class OcppClientAuthHandler{
         });
     }
     async authorize(accept:Function, reject:Function, handshake:any){
-        Logger.log("Incoming request...");
-        let connector = await DbModelConnectors.readById(handshake.identity);
-        if (connector !== undefined && connector.password === handshake.password.toString('utf8')){
-            Logger.log("Accepted incoming request");
-            accept({
-                sessionId: `${this._idIncrementor++}`
-            });
-        }else{
-            Logger.log("Rejected Incoming Request: Unauthorized");
-            reject(401)
+        if(!handshake.identity){
+            Logger.log("ClientAuth", "Client without identity");
+            reject(401);
+            return;
         }
+        let station = await DbModelStations.readByOcppIdentity(handshake.identity);
+        if(!station){
+            Logger.log("ClientAuth", `Client with unknown identity (${handshake.identity})`);
+            reject(401);
+            return;
+        }
+        accept({
+            sessionId: `${this._idIncrementor++}`
+        });
     }
 }
