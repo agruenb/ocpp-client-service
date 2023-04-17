@@ -2,18 +2,17 @@
 //@ts-nocheck
 import OcppClientMessageHandler from "./OcppClientMessageHandler";
 import OcppClientAuthHandler from "./OcppClientAuthHandler";
-import OcppServerMessageHandler from "./ServerMessageQueueHandler";
-import CommandApiHandler from "./CommandApiHandler";
+import ApiHandler from "./ApiHandler";
 
 const express = require('express');
 const { RPCServer } = require("ocpp-rpc");
 
 const app = express();
 app.use(express.json());
-const commandApiHandler = new CommandApiHandler();
-commandApiHandler.attachTo(app);
+const apiHandler = new ApiHandler();
+apiHandler.attachTo(app);
 
-const httpServer = app.listen(3000);
+const httpServer = app.listen(3001);
 
 const rpcServer = new RPCServer({
     protocols: ['ocpp1.6'],

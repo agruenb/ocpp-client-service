@@ -1,7 +1,6 @@
 import Logger from "../logs/Logger";
-import redisClient from "../redis-db/mainRedisClient";
-import RedisOperations from "../redis-db/RedisOperations";
 import { FromSchema } from "json-schema-to-ts";
+import mainClientManager from "../mainClientManager";
 
 const StatusNotificationJson = {
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -87,7 +86,7 @@ export default class StatusNotificationHandler{
     async handler(msg:any){
         let data:StatusNotification = msg.params;
         Logger.log("StatusMessageHandler", `Got StatusNotification - ID: ${this._client.identity}`);
-        await RedisOperations.updateOcppClientStatus(redisClient, this._client, data.status);
         msg.reply({});
+        mainClientManager.updateClientInfo(this._client.identity, {"statusNotification":data});
     }
 }

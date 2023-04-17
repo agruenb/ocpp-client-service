@@ -4,7 +4,7 @@ import { Request } from "express-serve-static-core";
 import Logger from "./logs/Logger";
 import mainClientHandler from "./mainClientManager";
 
-export default class CommandApiHandler{
+export default class ApiHandler{
     attachTo(app:Express){
         app.post("/remoteStartTransaction", async (req, res) => {
             this.remoteStartTransactionCommandHandler(req, res);
@@ -12,6 +12,22 @@ export default class CommandApiHandler{
         app.post("/remoteStopTransaction", async (req, res) => {
             this.remoteStopTransactionCommandHandler(req, res);
         });
+        app.get("/connectedOcppClients", async (req, res) => {
+            this.getConnectedOcppClientsHandler(req, res);
+        });
+        app.get("/ocppClientInfo", async (req, res) => {
+            this.getOcppClientInfo(req, res);
+        });
+    }
+    getConnectedOcppClientsHandler(req:Request, res:Response){
+        Logger.log("CmdApi","Received GetConnectedOcppClients via command API");
+        let jsonString = JSON.stringify(mainClientHandler.getClientIds());
+        res.end(jsonString);
+    }
+    getOcppClientInfo(req:Request, res:Response){
+        Logger.log("CmdApi","Received getOcppClientInfo via command API");
+        let jsonString = JSON.stringify(mainClientHandler.getClientInfo(req.params.ocppIdentity));
+        res.end(jsonString);
     }
     remoteStartTransactionCommandHandler(req:Request, res:Response){
         Logger.log("CmdApi","Received RemoteStartTransaction via command API");

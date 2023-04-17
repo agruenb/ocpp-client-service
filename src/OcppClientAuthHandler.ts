@@ -1,15 +1,9 @@
 import { DbModelStations } from "./db/src/DbModelStations";
 import Logger from "./logs/Logger";
-import OcppServerMessageHandler from "./ServerMessageQueueHandler";
 
 export default class OcppClientAuthHandler{
 
     _idIncrementor = 1;
-    _serverMessageHandler:OcppServerMessageHandler;
-
-    constructor(serverMessageHandler:OcppServerMessageHandler){
-        this._serverMessageHandler = serverMessageHandler
-    }
 
     attachTo(ocppRpcServer:any):any{
         ocppRpcServer.auth((accept:any, reject:any, handshake:any) => {
