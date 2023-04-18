@@ -1,6 +1,7 @@
 import Logger from "./logs/Logger";
 import { StatusNotification } from "./messageHandlersOcpp16/StatusNotificationHandler";
-import RedisPublish from "./redis-db/RedisPublish";
+import redisPublisher from "./redis-db/RedisPublisher";
+import RedisPublish from "./redis-db/RedisPublisher";
 import mainRedisClient from "./redis-db/mainRedisClient";
 
 export type ClientInfo = {
@@ -11,13 +12,6 @@ export default class OcppClientManager {
 
     _list: Array<any> = [];
     _clientInfo: { [key: string]: ClientInfo } = {};
-
-    _publisher: RedisPublish;
-
-    constructor() {
-        this._publisher = new RedisPublish(mainRedisClient);
-        this._publisher.connect();
-    }
 
     clientByIdentity(id: string) {
         return this._list.filter(el => { return el.identity === id })[0];
@@ -58,14 +52,24 @@ export default class OcppClientManager {
         } else {
             this._clientInfo[clientIdentity] = { ...info };
         }
-        this._publisher.clientInfoUpdated(this.getClientInfo(clientIdentity));
+        redisPublisher.clientInfoUpdated(this.getClientInfo(clientIdentity));
     }
-    getClientInfo(clientIdentity: string): ClientInfo {
-        const client = this.clientByIdentity(clientIdentity);
-        const clientInfo = this._clientInfo[clientIdentity] ? this._clientInfo[clientIdentity] : {};
-        let fullInfo = {
-            "ocppIdentity": client.identity,
-            ...clientInfo
+    getClientInfo(clientIdentity?:string): Array<ClientInfo> {
+        let fullInfo = [];
+        if(!clientIdentity){
+            for(const key of Object.keys(this._clientInfo)){
+                const clientInfo = this._clientInfo[key];
+                fullInfo.push({
+                    "ocppIdentity": key,
+                    ...clientInfo
+                })
+            }
+        }else{
+            const clientInfo = this._clientInfo[clientIdentity] ? this._clientInfo[clientIdentity] : {};
+            fullInfo.push({
+                "ocppIdentity": clientIdentity,
+                ...clientInfo
+            })
         }
         return fullInfo;
     }

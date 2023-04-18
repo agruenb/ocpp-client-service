@@ -3,6 +3,7 @@ import HearbeatHandler from "./messageHandlersOcpp16/HeartbeatHandler";
 import ocppClientsManager from "./mainClientManager";
 import StartTransactionHandler from "./messageHandlersOcpp16/StartTransactionHandler";
 import StatusNotificationHandler from "./messageHandlersOcpp16/StatusNotificationHandler";
+import StopTransactionHandler from "./messageHandlersOcpp16/StopTransactionHandler";
 
 const { createRPCError } = require("ocpp-rpc");
 
@@ -17,20 +18,13 @@ export default class OcppClientMessageHandler {
 
             (new StartTransactionHandler).attachTo(client);
 
+            (new StopTransactionHandler).attachTo(client);
+
             (new StatusNotificationHandler).attachTo(client);
 
             // create a specific handler for handling StatusNotification requests
             client.handle('callError', ({ params }: any) => {
                 console.log(`Server got error from ${client.identity}:`, params);
-            });
-
-            client.handle("StopTransaction", (obj: any) => {
-                console.log("--- Allow stop ---");
-                return {
-                    idTagInfo: {
-                        status: "Accepted"
-                    }
-                }
             });
 
             // create a wildcard handler to handle any RPC method
