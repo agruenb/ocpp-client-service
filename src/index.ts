@@ -13,6 +13,7 @@ const apiHandler = new ApiHandler();
 apiHandler.attachTo(app);
 
 const httpServer = app.listen(3001);
+console.log("Client Service running on port 3001")
 
 const rpcServer = new RPCServer({
     protocols: ['ocpp1.6'],
