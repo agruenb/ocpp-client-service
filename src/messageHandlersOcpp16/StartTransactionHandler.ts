@@ -37,15 +37,15 @@ const StartTransactionJson = {
 
 export type StartTransaction = FromSchema<typeof StartTransactionJson>;
 
-export default class StartTransactionHandler{
+export default class StartTransactionHandler {
 
-    _client:any;
+    _client: any;
 
-    attachTo(client:any){
+    attachTo(client: any) {
         this._client = client;
-        client.handle('StartTransaction', (params:any) => this.handler(params));
+        client.handle('StartTransaction', (params: any) => this.handler(params));
     }
-    async handler(msg:any){
+    async handler(msg: any) {
         let transaction = await DbModelStartTransaction.create(this._client.identity, 0, "fakeTag", 303, (new Date()).toISOString());
         msg.reply({
             transactionId: transaction.id,
@@ -54,7 +54,11 @@ export default class StartTransactionHandler{
                 expiryDate: "2023-09-22T12:10:38.736Z"
             }
         });
-        let startTransaction:StartTransaction = msg.params;
-        redisPublisher.transactionStarted([startTransaction]);
+        let startTransaction: StartTransaction = msg.params;
+        let info = {
+            transactionId: transaction.id,
+            ocppIdentity: this._client.identity
+        }
+        redisPublisher.transactionStarted([info], [startTransaction]);
     }
 }
