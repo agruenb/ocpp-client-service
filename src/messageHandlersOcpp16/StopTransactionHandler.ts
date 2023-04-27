@@ -1,5 +1,5 @@
 import { FromSchema } from "json-schema-to-ts";
-import { DbModelStopTransaction } from "../db/src/DbModelStopTransaction";
+import { DbModelTransaction } from "../db/src/DbModelTransactions";
 import Logger from "../logs/Logger";
 import redisPublisher from "../redis-db/RedisPublisher";
 
@@ -193,7 +193,7 @@ export default class StopTransactionHandler{
     async handler(msg:any){
         let stoppedTransactionParams:StopTransaction = msg.params;
         try {
-            let stoppedTransaction = await DbModelStopTransaction.create(
+            let stoppedTransaction = await DbModelTransaction.updateFinished(
                 stoppedTransactionParams.transactionId,
                 stoppedTransactionParams.meterStop,
                 stoppedTransactionParams.timestamp

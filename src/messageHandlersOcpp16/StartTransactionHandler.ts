@@ -1,5 +1,5 @@
 import { FromSchema } from "json-schema-to-ts";
-import { DbModelStartTransaction } from "../db/src/DbModelStartTransaction";
+import { DbModelTransaction } from "../db/src/DbModelTransactions";
 import redisPublisher from "../redis-db/RedisPublisher";
 
 const StartTransactionJson = {
@@ -46,7 +46,7 @@ export default class StartTransactionHandler {
         client.handle('StartTransaction', (params: any) => this.handler(params));
     }
     async handler(msg: any) {
-        let transaction = await DbModelStartTransaction.create(this._client.identity, 0, "fakeTag", 303, (new Date()).toISOString());
+        let transaction = await DbModelTransaction.createStarted(this._client.identity, 0, "fakeTag", 303, (new Date()).toISOString());
         msg.reply({
             transactionId: transaction.id,
             idTagInfo: {
