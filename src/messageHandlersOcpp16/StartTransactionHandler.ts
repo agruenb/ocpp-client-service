@@ -1,6 +1,7 @@
 import { FromSchema } from "json-schema-to-ts";
 import { DbModelTransaction } from "../db/src/DbModelTransactions";
 import redisPublisher from "../redis-db/RedisPublisher";
+import EventEmitter from "events";
 
 const StartTransactionJson = {
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -37,7 +38,7 @@ const StartTransactionJson = {
 
 export type StartTransaction = FromSchema<typeof StartTransactionJson>;
 
-export default class StartTransactionHandler {
+export default class StartTransactionHandler extends EventEmitter {
 
     _client: any;
 
@@ -60,5 +61,6 @@ export default class StartTransactionHandler {
             ocppIdentity: this._client.identity
         }
         redisPublisher.transactionStarted([info], [startTransaction]);
+        this.emit("msg", transaction);
     }
 }

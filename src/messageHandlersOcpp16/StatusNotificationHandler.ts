@@ -1,6 +1,6 @@
 import Logger from "../logs/Logger";
 import { FromSchema } from "json-schema-to-ts";
-import mainClientManager from "../mainClientManager";
+import EventEmitter from "events";
 
 const StatusNotificationJson = {
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -75,7 +75,7 @@ const StatusNotificationJson = {
 
 export type StatusNotification = FromSchema<typeof StatusNotificationJson>;
 
-export default class StatusNotificationHandler{
+export default class StatusNotificationHandler extends EventEmitter{
 
     _client:any;
 
@@ -87,6 +87,6 @@ export default class StatusNotificationHandler{
         let data:StatusNotification = msg.params;
         Logger.log("StatusMessageHandler", `Got StatusNotification - ID: ${this._client.identity}`);
         msg.reply({});
-        mainClientManager.updateClientInfo(this._client.identity, {"statusNotification":data});
+        this.emit("msg", data);
     }
 }

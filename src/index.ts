@@ -1,7 +1,7 @@
 
 //@ts-nocheck
-import OcppClientMessageHandler from "./OcppClientMessageHandler";
 import OcppClientAuthHandler from "./OcppClientAuthHandler";
+import ocppClientManager from "./mainClientManager";
 import ApiHandler from "./ApiHandler";
 
 const express = require('express');
@@ -20,10 +20,11 @@ const rpcServer = new RPCServer({
     strictMode: true,
 });
 
-httpServer.on('upgrade', rpcServer.handleUpgrade);
-
 const authHandler = new OcppClientAuthHandler();
 authHandler.attachTo(rpcServer);
 
-const clientHandler = new OcppClientMessageHandler();
-clientHandler.attachTo(rpcServer);
+rpcServer.on('client', async (client: any) => {
+    ocppClientManager.add(client);
+});
+
+httpServer.on('upgrade', rpcServer.handleUpgrade);

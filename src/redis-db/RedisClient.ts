@@ -8,7 +8,7 @@ export default function setUpRedis():RedisClientType{
         password: process.env.REDIS_SERVER_PASSWORD,
         socket: {
             host: process.env.REDIS_SERVER_URI,
-            port: parseInt(process.env.REDIS_SERVER_PORT || "")
+            port: parseInt(process.env.REDIS_SERVER_PORT || "6379")
         }
     });
     redis_client.on('error', err => Logger.error("RedisClient", "Redis error", err));

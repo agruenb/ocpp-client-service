@@ -26,7 +26,7 @@ export default class ApiHandler{
     }
     getOcppClientInfo(req:Request, res:Response){
         Logger.log("CmdApi","Received getOcppClientInfo via command API");
-        let jsonString = JSON.stringify(mainClientHandler.getClientInfo());
+        let jsonString = JSON.stringify(mainClientHandler.getAllClientInfo());
         res.end(jsonString);
     }
     remoteStartTransactionCommandHandler(req:Request, res:Response){

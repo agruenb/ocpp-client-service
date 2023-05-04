@@ -2,6 +2,7 @@ import { FromSchema } from "json-schema-to-ts";
 import { DbModelTransaction } from "../db/src/DbModelTransactions";
 import Logger from "../logs/Logger";
 import redisPublisher from "../redis-db/RedisPublisher";
+import EventEmitter from "events";
 
 const StopTransactionJson = {
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -182,7 +183,7 @@ const StopTransactionJson = {
 
 export type StopTransaction = FromSchema<typeof StopTransactionJson>;
 
-export default class StopTransactionHandler{
+export default class StopTransactionHandler extends EventEmitter{
 
     _client:any;
 
@@ -208,5 +209,6 @@ export default class StopTransactionHandler{
                 status: "Accepted"
             }
         });
+        this.emit("msg", stoppedTransactionParams);
     }
 }

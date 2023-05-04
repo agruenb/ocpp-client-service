@@ -1,5 +1,6 @@
 import { FromSchema } from "json-schema-to-ts";
 import Logger from "../logs/Logger";
+import EventEmitter from "events";
 
 const BootNotificationJson = {
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -53,7 +54,7 @@ const BootNotificationJson = {
 
 export type BootNotification = FromSchema<typeof BootNotificationJson>;
 
-export default class BootNotificationHandler{
+export default class BootNotificationHandler extends EventEmitter{
 
     _client:any;
 
@@ -63,10 +64,12 @@ export default class BootNotificationHandler{
     }
     handler(msg:any){
         Logger.log("BootNotificationHandler", `BootNotification - ID: ${this._client.identity}`);
-        return {
+        let bootNotification:BootNotification = msg.params;
+        msg.reply({
             status: "Accepted",
             interval: 300,
             currentTime: new Date().toISOString()
-        };
+        });
+        this.emit("msg", bootNotification);
     }
 }
