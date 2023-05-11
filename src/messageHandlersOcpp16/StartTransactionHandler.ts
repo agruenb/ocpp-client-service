@@ -47,7 +47,8 @@ export default class StartTransactionHandler extends EventEmitter {
         client.handle('StartTransaction', (params: any) => this.handler(params));
     }
     async handler(msg: any) {
-        let transaction = await DbModelTransaction.createStarted(this._client.identity, 0, "fakeTag", 303, (new Date()).toISOString());
+        let data:StartTransaction = msg.params;
+        let transaction = await DbModelTransaction.createStarted(this._client.identity, 0, "fakeTag", data.meterStart, (new Date()).toISOString());
         msg.reply({
             transactionId: transaction.id,
             idTagInfo: {
