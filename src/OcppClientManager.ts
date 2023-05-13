@@ -1,6 +1,7 @@
 import Logger from "./logs/Logger";
 import BootNotificationHandler, { BootNotification } from "./messageHandlersOcpp16/BootNotificationHandler";
 import HearbeatHandler from "./messageHandlersOcpp16/HeartbeatHandler";
+import MeterValuesHandler, { MeterValues } from "./messageHandlersOcpp16/MeterValuesHandler";
 import StartTransactionHandler, { StartTransaction } from "./messageHandlersOcpp16/StartTransactionHandler";
 import StatusNotificationHandler, { StatusNotification } from "./messageHandlersOcpp16/StatusNotificationHandler";
 import StopTransactionHandler, { StopTransaction } from "./messageHandlersOcpp16/StopTransactionHandler";
@@ -82,28 +83,31 @@ export default class OcppClientManager {
         bootNotificationHandler.on("msg", (bootNotification:BootNotification) => {
             this.updateClientInfo(client.identity, {lastSeen: Date.now()});
             redisPublisher.clientInfoUpdated([this.getClientInfo(client.identity)]);
-        })
+        });
 
         let heartbeatHandler = new HearbeatHandler();
         heartbeatHandler.attachTo(client);
         heartbeatHandler.on("msg", () => {
             this.updateClientInfo(client.identity, {lastSeen: Date.now()});
             redisPublisher.clientInfoUpdated([this.getClientInfo(client.identity)]);
-        })
+        });
+
+        let meterValuesHandler = new MeterValuesHandler();
+        meterValuesHandler.attachTo(client);
+        meterValuesHandler.on("msg", (meter:MeterValues) => {
+            this.updateClientInfo(client.identity, {
+                lastSeen: Date.now(),
+                meterValues: meter
+            });
+            redisPublisher.clientInfoUpdated([this.getClientInfo(client.identity)]);
+        });
 
         let startTransactionHandler = new StartTransactionHandler();
         startTransactionHandler.attachTo(client);
         startTransactionHandler.on("msg", (stopTransaction:StartTransaction) => {
             this.updateClientInfo(client.identity, {lastSeen: Date.now()});
             redisPublisher.clientInfoUpdated([this.getClientInfo(client.identity)]);
-        })
-
-        let stopTransactionHandler = new StopTransactionHandler();
-        stopTransactionHandler.attachTo(client);
-        stopTransactionHandler.on("msg", (stopTransaction:StopTransaction) => {
-            this.updateClientInfo(client.identity, {lastSeen: Date.now()});
-            redisPublisher.clientInfoUpdated([this.getClientInfo(client.identity)]);
-        })
+        });
 
         let statusNotificationHandler = new StatusNotificationHandler();
         statusNotificationHandler.attachTo(client);
@@ -113,16 +117,21 @@ export default class OcppClientManager {
             redisPublisher.clientInfoUpdated([this.getClientInfo(client.identity)]);
         });
 
+        let stopTransactionHandler = new StopTransactionHandler();
+        stopTransactionHandler.attachTo(client);
+        stopTransactionHandler.on("msg", (stopTransaction:StopTransaction) => {
+            this.updateClientInfo(client.identity, {lastSeen: Date.now()});
+            redisPublisher.clientInfoUpdated([this.getClientInfo(client.identity)]);
+        });
+
         client.handle('callError', ({ params }: any) => {
             console.log(`Server got error from ${client.identity}:`, params);
         });
 
-        // create a wildcard handler to handle any RPC method
+        
         client.handle(({ method, params }: any) => {
             // This handler will be called if the incoming method cannot be handled elsewhere.
             console.log(`Server got ${method} from ${client.identity}:`, params);
-
-            // throw an RPC error to inform the server that we don't understand the request.
             throw createRPCError("NotImplemented");
         });
     }
