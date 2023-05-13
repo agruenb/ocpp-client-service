@@ -95,16 +95,13 @@ export default class OcppClientManager {
         let meterValuesHandler = new MeterValuesHandler();
         meterValuesHandler.attachTo(client);
         meterValuesHandler.on("msg", (meter:MeterValues) => {
-            this.updateClientInfo(client.identity, {
-                lastSeen: Date.now(),
-                meterValues: meter
-            });
+            this.updateClientInfo(client.identity, {lastSeen: Date.now()});
             redisPublisher.clientInfoUpdated([this.getClientInfo(client.identity)]);
         });
 
         let startTransactionHandler = new StartTransactionHandler();
         startTransactionHandler.attachTo(client);
-        startTransactionHandler.on("msg", (stopTransaction:StartTransaction) => {
+        startTransactionHandler.on("msg", (startTransaction:StartTransaction) => {
             this.updateClientInfo(client.identity, {lastSeen: Date.now()});
             redisPublisher.clientInfoUpdated([this.getClientInfo(client.identity)]);
         });
